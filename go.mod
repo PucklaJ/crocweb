@@ -2,7 +2,10 @@ module github.com/PucklaJ/crocweb
 
 go 1.20
 
-require github.com/schollz/croc/v9 v9.6.4
+require (
+	github.com/gopherjs/gopherjs v1.17.2
+	github.com/schollz/croc/v9 v9.6.4
+)
 
 require (
 	github.com/cespare/xxhash v1.1.0 // indirect

@@ -1,7 +1,12 @@
 <head>
   <title>CrocWeb</title>
+  <script src="crocweb.js"></script>
 </head>
 
-<body>
+<body onload="init()">
   <h1>Welcome to CrocWeb!</h1>
+  <input id="code_text" type="text" />
+  <button id="request_button" onclick="code_text_enter()">Request</button>
+  <br>
+  <div id="receive_holder"></div>
 </body>

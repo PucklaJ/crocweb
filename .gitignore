@@ -1,8 +1,11 @@
 .*
 !.gitignore
+*.js
+*.js.map
 
 cmd/send/send
 cmd/recv/recv
 crocweb
+__debug_bin
 
 receive_tmp

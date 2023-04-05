@@ -14,7 +14,7 @@ import (
 )
 
 func root(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, filepath.Join(Server.RootDir, "index.html"))
+	http.ServeFile(w, r, filepath.Join(Server.RootDir, r.URL.Path))
 }
 
 func code(w http.ResponseWriter, r *http.Request) {
