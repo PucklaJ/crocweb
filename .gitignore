@@ -1,0 +1,5 @@
+.*
+!.gitignore
+
+cmd/send/send
+cmd/recv/recv
