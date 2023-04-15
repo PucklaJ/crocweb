@@ -153,7 +153,7 @@ func receive(w http.ResponseWriter, r *http.Request) {
 		base64Str := base64.StdEncoding.EncodeToString(contents)
 
 		htmlElement = fmt.Sprint(
-			"<img style=\"width:500;\" src=\"data:image/",
+			"<img style=\"width:", global.FileWidth, ";\" src=\"data:image/",
 			strings.ToLower(strings.TrimPrefix(ext, ".")),
 			";base64,",
 			base64Str,
@@ -173,7 +173,7 @@ func receive(w http.ResponseWriter, r *http.Request) {
 			}
 
 			htmlElement = fmt.Sprint(
-				"<video width=\"500\" controls>",
+				"<video width=\"", global.FileWidth, "\" controls>",
 				"<source src=\"data:video/", dataType,
 				";base64,", base64Str, "\">",
 				"Your browser does not support the video tag",

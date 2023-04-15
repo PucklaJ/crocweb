@@ -6,6 +6,8 @@ const (
 	DefaultCurve          = "p256"
 	DefaultHash           = "xxhash"
 	DefaultUploadThrottle = ""
+
+	FileWidth = 750
 )
 
 var (
