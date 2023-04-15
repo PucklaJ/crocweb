@@ -114,34 +114,41 @@ func receive(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	Server.receiveDataMtx.Lock()
+
 	recv, ok := Server.ReceiveData[id]
 	if !ok {
+		Server.receiveDataMtx.Unlock()
 		http.Error(w, fmt.Sprint("Receive with ID ", id, " not found"), http.StatusBadRequest)
+		return
 	}
 
 	if len(recv.Files) == 0 {
+		Server.receiveDataMtx.Unlock()
 		http.Error(w, "Receive does not have any files", http.StatusBadRequest)
 		return
 	}
 
 	if index >= uint64(len(recv.Files)) {
+		Server.receiveDataMtx.Unlock()
 		http.Error(w, fmt.Sprint("Receive Index ouf of Bounds (", index, " >= ", len(recv.Files), ")"), http.StatusBadRequest)
 		return
 	}
 
 	var htmlElement string
-
 	filePath := recv.Files[index].Name
+	contents, err := ioutil.ReadFile(filePath)
+	Server.receiveDataMtx.Unlock()
+	if err != nil {
+		http.Error(w, fmt.Sprint("Failed to read file: ", err), http.StatusInternalServerError)
+		return
+	}
+
 	if ext := filepath.Ext(filePath); strings.EqualFold(ext, ".png") ||
 		strings.EqualFold(ext, ".jpg") ||
 		strings.EqualFold(ext, ".jpeg") ||
 		strings.EqualFold(ext, ".gif") ||
 		strings.EqualFold(ext, ".bmp") {
-		contents, err := ioutil.ReadFile(filePath)
-		if err != nil {
-			http.Error(w, fmt.Sprint("Failed to read file: ", err), http.StatusInternalServerError)
-			return
-		}
 
 		base64Str := base64.StdEncoding.EncodeToString(contents)
 
@@ -153,20 +160,8 @@ func receive(w http.ResponseWriter, r *http.Request) {
 			"\" </img>",
 		)
 	} else if strings.EqualFold(ext, ".svg") {
-		contents, err := ioutil.ReadFile(filePath)
-		if err != nil {
-			http.Error(w, fmt.Sprint("Failed to read file: ", err), http.StatusInternalServerError)
-			return
-		}
-
 		htmlElement = string(contents)
 	} else if strings.EqualFold(ext, ".avi") || strings.EqualFold(ext, ".mov") || strings.EqualFold(ext, ".mp4") || strings.EqualFold(ext, ".ogg") || strings.EqualFold(ext, ".webm") || strings.EqualFold(ext, ".wmv") {
-		contents, err := ioutil.ReadFile(filePath)
-		if err != nil {
-			http.Error(w, fmt.Sprint("Failed to read file: ", err), http.StatusInternalServerError)
-			return
-		}
-
 		base64Str := base64.StdEncoding.EncodeToString(contents)
 
 		if strings.EqualFold(ext, ".avi") || strings.EqualFold(ext, ".wmv") {
@@ -186,12 +181,6 @@ func receive(w http.ResponseWriter, r *http.Request) {
 			)
 		}
 	} else {
-		contents, err := ioutil.ReadFile(filePath)
-		if err != nil {
-			http.Error(w, fmt.Sprint("Failed to read file: ", err), http.StatusInternalServerError)
-			return
-		}
-
 		if len(contents) > 200 {
 			htmlElement = fmt.Sprint("<textarea>", string(contents), "</textarea>")
 		} else {
@@ -218,9 +207,13 @@ func download(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	Server.receiveDataMtx.Lock()
+	defer Server.receiveDataMtx.Unlock()
+
 	recv, ok := Server.ReceiveData[id]
 	if !ok {
 		http.Error(w, fmt.Sprint("Receive with ID ", id, " not found"), http.StatusBadRequest)
+		return
 	}
 
 	if len(recv.Files) == 0 {

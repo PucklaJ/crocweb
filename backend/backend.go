@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 )
 
 const (
@@ -49,8 +50,41 @@ func StartServer() {
 	http.HandleFunc("/receive/", receive)
 	http.HandleFunc("/download/", download)
 
-	address := "0.0.0.0:8080"
+	cleanUpTicker := time.NewTicker(time.Second)
+	cleanUpExit := make(chan bool)
+	go func() {
+		for {
+			select {
+			case <-cleanUpTicker.C:
+				Server.receiveDataMtx.Lock()
 
+				var recvToDelete []uint64
+				for id, recv := range Server.ReceiveData {
+					recv.time -= time.Second
+					if recv.time <= 0 {
+						recvToDelete = append(recvToDelete, id)
+						// Delete all files
+						for _, f := range recv.Files {
+							err := os.Remove(f.Name)
+							if err != nil {
+								fmt.Fprintf(os.Stderr, "Failed to delete \"%s\": %s", f.Name, err)
+							}
+						}
+					}
+					Server.ReceiveData[id] = recv
+				}
+				for _, id := range recvToDelete {
+					delete(Server.ReceiveData, id)
+				}
+
+				Server.receiveDataMtx.Unlock()
+			case <-cleanUpExit:
+				return
+			}
+		}
+	}()
+
+	address := "0.0.0.0:8080"
 	fmt.Println("Listening on", address)
 
 	err = http.ListenAndServe(address, nil)
@@ -58,6 +92,9 @@ func StartServer() {
 		fmt.Println("Closing Server ...")
 	} else if err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
+		cleanUpExit <- false
 		os.Exit(1)
 	}
+
+	cleanUpExit <- true
 }
