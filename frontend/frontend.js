@@ -5,7 +5,7 @@ function CodeRequest(shared_secret) {
   return fetch(url)
 }
 
-function RecieveRequest(id, index) {
+function ReceiveRequest(id, index) {
   const url = `http://${server_host}/receive/${id}/${index}`
   return fetch(url)
 }
@@ -15,7 +15,7 @@ function DownloadRequest(id, index) {
   return fetch(url)
 }
 
-function LoadFileIntoHolder(file_name, id, index, receive_holder, receive_response) {
+function LoadFileIntoHolder(file_name, id, index, receive_holder, receive_response, todo_list) {
   console.log(`Receiving ${file_name} ...`)
 
   const file_div = document.createElement("div")
@@ -39,16 +39,31 @@ function LoadFileIntoHolder(file_name, id, index, receive_holder, receive_respon
   file_div.appendChild(file_download)
   receive_holder.appendChild(file_div)
 
-  receive_response.then(async recv_resp => {
+  receive_response.then(recv_resp => {
     console.log(`Got Response from ${file_name}`)
-    const recv_resp_text = await recv_resp.text()
-    if (recv_resp.ok) {
-      file_placeholder.innerHTML = recv_resp_text
-    } else {
-      file_placeholder.innerHTML = `<p>Response Error: ${recv_resp.status}/${recv_resp_text}</p>`
-    }
+    recv_resp.text()
+    .then(recv_resp_text => {
+      if (recv_resp.ok) {
+        file_placeholder.innerHTML = recv_resp_text
+      } else {
+        file_placeholder.innerHTML = `<p>Response Error: ${recv_resp.status}/${recv_resp_text}</p>`
+      }
+    })
+    .catch(error => {
+      file_placeholder.innerHTML = `<p>Promise Error: ${error}</p>`
+    })
+    .finally(() => {
+      todo_list.splice(todo_list.indexOf(index), 1)
+      if (todo_list.length == 0) {
+        request_button.disabled = false
+      }
+    })
   })
   receive_response.catch(error => {
+    todo_list.splice(todo_list.indexOf(index), 1)
+    if (todo_list.length == 0) {
+      request_button.disabled = false
+    }
     file_placeholder.innerHTML = `<p>Promise Error: ${error}</p>`
   })
 }
