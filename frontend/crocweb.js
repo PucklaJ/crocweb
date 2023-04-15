@@ -11,15 +11,14 @@ function request() {
   request_button.disabled = true
 
   shared_secret = code_text.value
-  console.log(`Requesting Code "${shared_secret}" ...`)
+
+  receive_holder.innerHTML = `<p>Requesting Code "${shared_secret}" ...</p>`
 
   CodeRequest(shared_secret)
   .then(code_response => {
     if (code_response.ok) {
       code_response.json()
       .then(receive_data => {
-        console.log(receive_data)
-
         receive_holder.innerHTML = null
         let todo_list = Array.from(Array(receive_data.files.length).keys())
         for (let i = 0; i < receive_data.files.length; i++) {
@@ -37,19 +36,22 @@ function request() {
         }
       })
       .catch(error => {
-        console.error(`CodeRequest Failed to parse JSON: ${error}`)
+        request_button.disabled = false
+        receive_holder.innerHTML = `<p>CodeRequest Failed to parse JSON: ${error}</p>`
       })
     } else {
+      request_button.disabled = false
       code_response.text()
       .then(error_msg => {
-        console.error(`CodeRequest Response Error: ${code_response.status}/${error_msg}`)
+        receive_holder.innerHTML = `<p>CodeRequest Response Error: ${code_response.status}/${error_msg}</p>`
       })
       .catch(error => {
-        console.error(`CodeRequest Response Error Message Error: ${error}`)
+        receive_holder.innerHTML = `<p>CodeRequest Response Error Message Error: ${error}</p>`
       })
     }
   })
   .catch(error => {
-    console.error(`CodeRequest Promise Error: ${error}`)
+    request_button.disabled = false
+    receive_holder.innerHTML = `<p>CodeRequest Promise Error: ${error}</p>`
   })
 }

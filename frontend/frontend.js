@@ -40,7 +40,6 @@ function LoadFileIntoHolder(file_name, id, index, receive_holder, receive_respon
   receive_holder.appendChild(file_div)
 
   receive_response.then(recv_resp => {
-    console.log(`Got Response from ${file_name}`)
     recv_resp.text()
     .then(recv_resp_text => {
       if (recv_resp.ok) {
