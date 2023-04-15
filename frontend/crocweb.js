@@ -29,6 +29,7 @@ function on_request() {
 
           LoadFileIntoHolder(
             recv_file,
+            receive_data.files[i].custom,
             receive_data.id,
             i,
             receive_holder,

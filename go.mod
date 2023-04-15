@@ -3,13 +3,14 @@ module github.com/PucklaJ/crocweb
 go 1.20
 
 require (
-	github.com/gopherjs/gopherjs v1.17.2
+	github.com/abema/go-mp4 v0.10.1
 	github.com/schollz/croc/v9 v9.6.4
 )
 
 require (
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/denisbrodbeck/machineid v1.0.1 // indirect
+	github.com/google/uuid v1.1.2 // indirect
 	github.com/kalafut/imohash v1.0.2 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect

@@ -55,35 +55,15 @@ func code(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		defer wg.Done()
 
-		ticker := time.NewTicker(time.Millisecond * 10)
-		for {
-			select {
-			case <-ticker.C:
-				if receiver.Step2FileInfoTransferred {
-					ticker.Stop()
+		success := <-doneChan
+		if success && recv == nil {
+			r := FromCroc(receiver)
+			recv = &r
 
-					r := FromCroc(receiver)
-					recv = &r
-
-					encoder := json.NewEncoder(w)
-					err = encoder.Encode(recv)
-					if err != nil {
-						http.Error(w, err.Error(), http.StatusInternalServerError)
-						return
-					}
-				}
-			case success := <-doneChan:
-				if success && recv == nil {
-					r := FromCroc(receiver)
-					recv = &r
-
-					encoder := json.NewEncoder(w)
-					err = encoder.Encode(recv)
-					if err != nil {
-						http.Error(w, err.Error(), http.StatusInternalServerError)
-						return
-					}
-				}
+			encoder := json.NewEncoder(w)
+			err = encoder.Encode(recv)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 		}

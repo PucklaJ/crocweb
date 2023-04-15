@@ -15,7 +15,7 @@ function DownloadRequest(id, index) {
   return fetch(url)
 }
 
-function LoadFileIntoHolder(file_name, id, index, receive_holder, receive_response, todo_list) {
+function LoadFileIntoHolder(file_name, custom, id, index, receive_holder, receive_response, todo_list) {
   const file_div = document.createElement("div")
   file_div.className = "file_div"
   const file_nm = document.createElement("p")
@@ -32,7 +32,23 @@ function LoadFileIntoHolder(file_name, id, index, receive_holder, receive_respon
   }
 
   const file_placeholder = document.createElement("div")
-  file_placeholder.innerHTML = "<p>Loading ...</p>"
+  file_placeholder.innerHTML = '<p style="text-align:center;">Loading ...</p>'
+  if (custom != null) {
+    let width, height
+    if (custom.width !== undefined) {
+      width = custom.width
+    }
+    if (custom.height !== undefined) {
+      height = custom.height
+    }
+
+    const styleWidth = 750
+    const styleHeight = height / width * styleWidth
+
+    file_placeholder.style.width = styleWidth
+    file_placeholder.style.height = styleHeight
+    file_placeholder.style.backgroundColor = "#a83232"
+  }
 
   file_div.appendChild(file_placeholder)
   file_div.appendChild(document.createElement("div"))
