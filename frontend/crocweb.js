@@ -25,7 +25,15 @@ function request() {
         for (let i = 0; i < receive_data.files.length; i++) {
           const recv_file = receive_data.files[i].name;
           const receive_response = ReceiveRequest(receive_data.id, i)
-          LoadFileIntoHolder(recv_file, receive_data.id, i, receive_holder, receive_response, todo_list)
+
+          LoadFileIntoHolder(
+            recv_file,
+            receive_data.id,
+            i,
+            receive_holder,
+            receive_response,
+            todo_list
+          )
         }
       })
       .catch(error => {
