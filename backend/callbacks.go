@@ -100,10 +100,17 @@ func code(w http.ResponseWriter, r *http.Request) {
 }
 
 func receive(w http.ResponseWriter, r *http.Request) {
-	idStr := filepath.Base(r.URL.Path)
+	indexStr := filepath.Base(r.URL.Path)
+	idStr := filepath.Base(filepath.Dir(r.URL.Path))
+
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
 		http.Error(w, fmt.Sprint("Invalid Receive ID ", idStr), http.StatusBadRequest)
+		return
+	}
+	index, err := strconv.ParseUint(indexStr, 10, 64)
+	if err != nil {
+		http.Error(w, fmt.Sprint("Invalid Receive Index ", indexStr), http.StatusBadRequest)
 		return
 	}
 
@@ -117,9 +124,14 @@ func receive(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if index >= uint64(len(recv.Files)) {
+		http.Error(w, fmt.Sprint("Receive Index ouf of Bounds (", index, " >= ", len(recv.Files), ")"), http.StatusBadRequest)
+		return
+	}
+
 	var htmlElement string
 
-	filePath := recv.Files[0].Name
+	filePath := recv.Files[index].Name
 	if ext := filepath.Ext(filePath); strings.EqualFold(ext, ".png") || strings.EqualFold(ext, ".jpg") || strings.EqualFold(ext, ".jpeg") || strings.EqualFold(ext, ".gif") {
 		contents, err := ioutil.ReadFile(filePath)
 		if err != nil {
@@ -130,7 +142,7 @@ func receive(w http.ResponseWriter, r *http.Request) {
 		base64Str := base64.StdEncoding.EncodeToString(contents)
 
 		htmlElement = fmt.Sprint(
-			"<img src=\"data:image/",
+			"<img style=\"width:500;\" src=\"data:image/",
 			strings.ToLower(strings.TrimPrefix(ext, ".")),
 			";base64,",
 			base64Str,
@@ -144,6 +156,31 @@ func receive(w http.ResponseWriter, r *http.Request) {
 		}
 
 		htmlElement = string(contents)
+	} else if strings.EqualFold(ext, ".avi") || strings.EqualFold(ext, ".mov") || strings.EqualFold(ext, ".mp4") || strings.EqualFold(ext, ".ogg") || strings.EqualFold(ext, ".webm") || strings.EqualFold(ext, ".wmv") {
+		contents, err := ioutil.ReadFile(filePath)
+		if err != nil {
+			http.Error(w, fmt.Sprint("Failed to read file: ", err), http.StatusInternalServerError)
+			return
+		}
+
+		base64Str := base64.StdEncoding.EncodeToString(contents)
+
+		if strings.EqualFold(ext, ".avi") || strings.EqualFold(ext, ".wmv") {
+			htmlElement = fmt.Sprint("<p>", strings.ToUpper(strings.TrimPrefix(ext, ".")), " files are not supported</p>")
+		} else {
+			dataType := strings.ToLower(strings.TrimPrefix(ext, "."))
+			if dataType == "mov" {
+				dataType = "mp4"
+			}
+
+			htmlElement = fmt.Sprint(
+				"<video width=\"500\" controls>",
+				"<source src=\"data:video/", dataType,
+				";base64,", base64Str, "\">",
+				"Your browser does not support the video tag",
+				"</video>",
+			)
+		}
 	} else {
 		contents, err := ioutil.ReadFile(filePath)
 		if err != nil {
