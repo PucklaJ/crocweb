@@ -48,9 +48,11 @@ func StartServer() {
 	http.HandleFunc("/code/", code)
 	http.HandleFunc("/receive/", receive)
 
-	fmt.Println("Listening on localhost:8080")
+	address := "0.0.0.0:8080"
 
-	err = http.ListenAndServe("localhost:8080", nil)
+	fmt.Println("Listening on", address)
+
+	err = http.ListenAndServe(address, nil)
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Println("Closing Server ...")
 	} else if err != nil {
