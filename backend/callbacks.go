@@ -1,11 +1,14 @@
 package backend
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -114,5 +117,47 @@ func receive(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.ServeFile(w, r, recv.Files[0].Name)
+	var htmlElement string
+
+	filePath := recv.Files[0].Name
+	if ext := filepath.Ext(filePath); strings.EqualFold(ext, ".png") || strings.EqualFold(ext, ".jpg") || strings.EqualFold(ext, ".jpeg") || strings.EqualFold(ext, ".gif") {
+		contents, err := ioutil.ReadFile(filePath)
+		if err != nil {
+			http.Error(w, fmt.Sprint("Failed to read file: ", err), http.StatusInternalServerError)
+			return
+		}
+
+		base64Str := base64.StdEncoding.EncodeToString(contents)
+
+		htmlElement = fmt.Sprint(
+			"<img src=\"data:image/",
+			strings.ToLower(strings.TrimPrefix(ext, ".")),
+			";base64,",
+			base64Str,
+			"\" </img>",
+		)
+	} else if strings.EqualFold(ext, ".svg") {
+		contents, err := ioutil.ReadFile(filePath)
+		if err != nil {
+			http.Error(w, fmt.Sprint("Failed to read file: ", err), http.StatusInternalServerError)
+			return
+		}
+
+		htmlElement = string(contents)
+	} else {
+		contents, err := ioutil.ReadFile(filePath)
+		if err != nil {
+			http.Error(w, fmt.Sprint("Failed to read file: ", err), http.StatusInternalServerError)
+			return
+		}
+
+		if len(contents) > 200 {
+			htmlElement = fmt.Sprint("<textarea>", string(contents), "</textarea>")
+		} else {
+			htmlElement = fmt.Sprint("<p>", string(contents), "</p>")
+		}
+	}
+
+	reader := strings.NewReader(htmlElement)
+	http.ServeContent(w, r, filepath.Base(filePath), time.Now(), reader)
 }

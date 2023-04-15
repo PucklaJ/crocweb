@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"sync"
 )
 
@@ -26,6 +27,7 @@ func StartServer() {
 	} else {
 		Server.RootDir = "."
 	}
+	Server.RootDir = filepath.Join(Server.RootDir, "frontend")
 	Server.ReceiveData = make(map[uint64]Receive)
 
 	// Change into temporary file receive directory
@@ -45,6 +47,8 @@ func StartServer() {
 	http.HandleFunc("/", root)
 	http.HandleFunc("/code/", code)
 	http.HandleFunc("/receive/", receive)
+
+	fmt.Println("Listening on localhost:8080")
 
 	err = http.ListenAndServe("localhost:8080", nil)
 	if errors.Is(err, http.ErrServerClosed) {

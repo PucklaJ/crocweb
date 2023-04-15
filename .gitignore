@@ -1,6 +1,5 @@
 .*
 !.gitignore
-*.js
 *.js.map
 
 cmd/send/send
