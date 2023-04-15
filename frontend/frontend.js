@@ -1,10 +1,12 @@
+let server_host
+
 function CodeRequest(shared_secret) {
-  const url = `http://localhost:8080/code/${shared_secret}`
+  const url = `http://${server_host}/code/${shared_secret}`
   return fetch(url)
 }
 
 function RecieveRequest(id, index) {
-  const url = `http://localhost:8080/receive/${id}/${index}`
+  const url = `http://${server_host}/receive/${id}/${index}`
   return fetch(url)
 }
 

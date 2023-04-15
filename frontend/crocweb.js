@@ -4,8 +4,7 @@ function init() {
   code_text = document.getElementById("code_text")
   recieve_holder = document.getElementById("receive_holder")
   request_button = document.getElementById("request_button")
-
-  console.log("Frontend Loaded")
+  server_host = document.location.host
 }
 
 async function code_text_enter() {
