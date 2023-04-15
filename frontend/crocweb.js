@@ -1,14 +1,16 @@
-let code_text, receive_holder, request_button
+let code_text, receive_holder, request_button, clear_button
 
-function init() {
+function on_init() {
   code_text = document.getElementById("code_text")
   receive_holder = document.getElementById("receive_holder")
   request_button = document.getElementById("request_button")
+  clear_button = document.getElementById("clear_button")
   server_host = document.location.host
 }
 
-function request() {
+function on_request() {
   request_button.disabled = true
+  clear_button.disabled = true
 
   shared_secret = code_text.value
 
@@ -54,4 +56,9 @@ function request() {
     request_button.disabled = false
     receive_holder.innerHTML = `<p>CodeRequest Promise Error: ${error}</p>`
   })
+}
+
+function on_clear() {
+  receive_holder.innerHTML = null
+  clear_button.disabled = true
 }
