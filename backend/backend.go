@@ -47,6 +47,7 @@ func StartServer() {
 	http.HandleFunc("/", root)
 	http.HandleFunc("/code/", code)
 	http.HandleFunc("/receive/", receive)
+	http.HandleFunc("/download/", download)
 
 	address := "0.0.0.0:8080"
 

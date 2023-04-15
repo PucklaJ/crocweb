@@ -7,7 +7,7 @@ function init() {
   server_host = document.location.host
 }
 
-async function code_text_enter() {
+async function request() {
   request_button.disabled = true
 
   shared_secret = code_text.value
@@ -22,7 +22,7 @@ async function code_text_enter() {
     for (let i = 0; i < recieve_data.files.length; i++) {
       const recv_file = recieve_data.files[i].name;
       const receive_response = RecieveRequest(recieve_data.id, i)
-      LoadFileIntoHolder(recv_file, recieve_holder, receive_response)
+      LoadFileIntoHolder(recv_file, recieve_data.id, i, recieve_holder, receive_response)
     }
   } else {
     const error_msg = await code_response.text()

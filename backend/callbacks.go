@@ -132,7 +132,11 @@ func receive(w http.ResponseWriter, r *http.Request) {
 	var htmlElement string
 
 	filePath := recv.Files[index].Name
-	if ext := filepath.Ext(filePath); strings.EqualFold(ext, ".png") || strings.EqualFold(ext, ".jpg") || strings.EqualFold(ext, ".jpeg") || strings.EqualFold(ext, ".gif") {
+	if ext := filepath.Ext(filePath); strings.EqualFold(ext, ".png") ||
+		strings.EqualFold(ext, ".jpg") ||
+		strings.EqualFold(ext, ".jpeg") ||
+		strings.EqualFold(ext, ".gif") ||
+		strings.EqualFold(ext, ".bmp") {
 		contents, err := ioutil.ReadFile(filePath)
 		if err != nil {
 			http.Error(w, fmt.Sprint("Failed to read file: ", err), http.StatusInternalServerError)
@@ -197,4 +201,37 @@ func receive(w http.ResponseWriter, r *http.Request) {
 
 	reader := strings.NewReader(htmlElement)
 	http.ServeContent(w, r, filepath.Base(filePath), time.Now(), reader)
+}
+
+func download(w http.ResponseWriter, r *http.Request) {
+	indexStr := filepath.Base(r.URL.Path)
+	idStr := filepath.Base(filepath.Dir(r.URL.Path))
+
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, fmt.Sprint("Invalid Receive ID ", idStr), http.StatusBadRequest)
+		return
+	}
+	index, err := strconv.ParseUint(indexStr, 10, 64)
+	if err != nil {
+		http.Error(w, fmt.Sprint("Invalid Receive Index ", indexStr), http.StatusBadRequest)
+		return
+	}
+
+	recv, ok := Server.ReceiveData[id]
+	if !ok {
+		http.Error(w, fmt.Sprint("Receive with ID ", id, " not found"), http.StatusBadRequest)
+	}
+
+	if len(recv.Files) == 0 {
+		http.Error(w, "Receive does not have any files", http.StatusBadRequest)
+		return
+	}
+
+	if index >= uint64(len(recv.Files)) {
+		http.Error(w, fmt.Sprint("Receive Index ouf of Bounds (", index, " >= ", len(recv.Files), ")"), http.StatusBadRequest)
+		return
+	}
+
+	http.ServeFile(w, r, recv.Files[index].Name)
 }
