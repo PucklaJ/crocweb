@@ -62,7 +62,7 @@
 
 <body onload="on_init()">
   <h1>Welcome to CrocWeb!</h1>
-  <input id="code_text" type="text" />
+  <input id="code_text" type="text" onkeydown="on_code_text(event)" />
   <div class="centered">
     <button class="main_button" id="request_button" onclick="on_request()">Request</button>
     <button class="main_button" id="clear_button" onclick="on_clear()" disabled>Clear</button>

@@ -62,3 +62,9 @@ function on_clear() {
   receive_holder.innerHTML = null
   clear_button.disabled = true
 }
+
+function on_code_text(event) {
+  if (event.keyCode == 13) {
+    on_request()
+  }
+}
