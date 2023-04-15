@@ -23,39 +23,12 @@ function LoadFileIntoHolder(file_name, id, index, receive_holder, receive_respon
   const file_download = document.createElement("button")
   file_nm.innerHTML = file_name
   file_download.innerHTML = "Download"
-  file_download.onclick = async function() {
-    const element = document.createElement("a")
-    element.style.display = "none"
-    element.setAttribute("download", file_name)
-
-    const download_response = await DownloadRequest(id, index)
-    if (download_response.ok) {
-      const download_blob = await download_response.blob()
-
-      if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-        window.navigator.msSaveOrOpenBlob(download_blob)
-      } else {
-        const data = window.URL.createObjectURL(download_blob)
-        const link = document.createElement("a")
-        link.href = data
-        link.download = file_name
-        link.dispatchEvent(
-          new MouseEvent('click', {
-            bubbles: true,
-            cancelable: true,
-            view: window
-          })
-        )
-
-        setTimeout(() => {
-          window.URL.revokeObjectURL(data)
-          link.remove()
-        }, 100)
-      }
-    } else {
-      const error_msg = await download_response.text()
-      console.error(`Failed to download ${file_name}: ${download_response.status}/${error_msg}`)
-    }
+  file_download.onclick = function() {
+    const link = document.createElement("a")
+    link.href = `http://${server_host}/download/${id}/${index}`
+    link.download = file_name
+    link.click()
+    setTimeout(link.remove, 100)
   }
 
   const file_placeholder = document.createElement("div")
