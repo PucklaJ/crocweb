@@ -27,11 +27,12 @@ function LoadFileIntoHolder(file_name, custom, id, index, receive_holder, receiv
   file_download.onclick = function() {
     const link = document.createElement("a")
     link.href = `http://${server_host}/download/${id}/${index}`
-    link.download = file_name
+    link.download = file_name.replace(/^.*[\\\/]/, '')
     link.click()
   }
 
   const file_placeholder = document.createElement("div")
+  const styleWidth = 750
   file_placeholder.innerHTML = '<p style="text-align:center;">Loading ...</p>'
   if (custom != null) {
     let width, height
@@ -42,7 +43,6 @@ function LoadFileIntoHolder(file_name, custom, id, index, receive_holder, receiv
       height = custom.height
     }
 
-    const styleWidth = 750
     const styleHeight = height / width * styleWidth
 
     file_placeholder.style.width = styleWidth
@@ -64,6 +64,8 @@ function LoadFileIntoHolder(file_name, custom, id, index, receive_holder, receiv
       } else {
         file_placeholder.innerHTML = `<p>Response Error: ${recv_resp.status}/${recv_resp_text}</p>`
       }
+      file_placeholder.style.width = "auto"
+      file_placeholder.style.height = "auto"
     })
     .catch(error => {
       file_placeholder.innerHTML = `<p>Promise Error: ${error}</p>`
